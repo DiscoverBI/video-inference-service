@@ -1,94 +1,69 @@
-## Overview
+# Vision Inference Service
 
-The Video Inference Service is an independent, open-source software component for
-AI-based image and video analysis.
+**AGPL-3.0 Licensed Component**
 
-It provides object detection and pose analysis via a simple HTTP API and is
-designed to run as a standalone service in on-premise environments.
+Isolierter KI-Dienst für Personenerkennung und Pose-Analyse mit YOLOv8.
 
-The service can be integrated with external systems via standard network
-interfaces but does not include any user interface or business logic.
+## Lizenz
 
-## Key Characteristics
-
-- Standalone inference service (no UI, no orchestration logic)
-- HTTP/REST API-based integration
-- Designed for on-premise operation
-- Replaceable and technology-agnostic interface
-- No dependency on specific client applications
-
-## Architectural Separation
-
-This repository contains only the Video Inference Service.
-
-It is intentionally designed as a technically and legally independent component.
-Any consuming system interacts with this service exclusively via a documented
-network API.
-
-This service is not embedded, linked, or integrated into any other software
-product.
-
-## License
-
-This software is licensed under the **GNU Affero General Public License v3.0
-(AGPL-3.0)**.
-
-You may use, modify, and redistribute this software in accordance with the terms
-of the AGPL-3.0.
-
-License text:
-https://www.gnu.org/licenses/agpl-3.0.html
-
-## Notice on Modifications and Network Use
-
-If you modify this software and make it available for use over a network,
-you are required to provide the complete corresponding source code of your
-modified version in accordance with the AGPL-3.0.
-
-This obligation applies independently of whether the software is operated
-locally or remotely.
-
-## Third-Party Software
-
-This project uses third-party open-source components.
-
-A complete list of included software and their respective licenses can be found
-in the file:
-
-- THIRD_PARTY_NOTICES.md
+Dieser Service ist unter AGPL-3.0 lizenziert, da er Ultralytics YOLO verwendet.
 
 ## Installation
 
-### Requirements
-- Python 3.x
-- Docker (optional, recommended)
-
-### Local Installation
-
+```bash
 pip install -r requirements.txt
+```
+
+## Start
+
+```bash
 python app.py
+```
 
-## API
+Der Service läuft auf `http://127.0.0.1:5001`
 
-The service exposes a simple HTTP API for inference requests.
+## API Endpunkte
 
-Example endpoints:
-- GET /health
-- POST /analyze
+### GET /health
+Health Check
 
-See the source code for request and response formats.
+### POST /analyze
+Frame-Analyse
 
-## No Warranty
+**Request:**
+```json
+{
+  "image": "base64_encoded_image",
+  "camera_name": "cam1",
+  "imgsz": 1280,
+  "conf_threshold": 0.5
+}
+```
 
-This software is provided "as is", without warranty of any kind, express or
-implied, except where required by applicable law.
+**Response:**
+```json
+{
+  "persons": [{
+    "bbox": [x1, y1, x2, y2],
+    "confidence": 0.92,
+    "keypoints": [[x, y, conf], ...],
+    "is_lying_down": false,
+    "angle": 85.5,
+    "position": {"x": 640, "y": 360}
+  }],
+  "timestamp": "2025-01-10T16:57:21",
+  "camera_name": "cam1"
+}
+```
 
-There is no obligation to provide support, maintenance, or updates unless
-explicitly agreed otherwise in writing.
+## Docker
 
-## Maintainer
+```bash
+docker build -t vision-inference-service .
+docker run -p 5001:5001 vision-inference-service
+```
 
-DiscoverBI UG (haftungsbeschränkt)
+## Austauschbarkeit
 
-Website: https://www.discover-bi.com  
-Contact: info@discover-bi.com
+Dieser Service kann durch jede andere Implementierung ersetzt werden,
+die dieselbe HTTP API bereitstellt.
