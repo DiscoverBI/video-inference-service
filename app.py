@@ -11,19 +11,31 @@ import base64
 import math
 import logging
 from datetime import datetime
+import torch
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Globales Modell (wird beim Start geladen)
 model = None
+device = None
 
 def load_model(model_path='yolov8n-pose.pt'):
     """Lädt das YOLO Pose Model"""
-    global model
+    global model, device
     try:
+        if torch.cuda.is_available():
+            device = 'cuda'
+            logging.info(f"✓ GPU erkannt: {torch.cuda.get_device_name(0)}")
+            logging.info(f"✓ CUDA Version: {torch.version.cuda}")
+            logging.info(f"✓ GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.2f} GB")
+        else:
+            device = 'cpu'
+            logging.warning("⚠ Keine GPU gefunden - verwende CPU")
+        
         model = YOLO(model_path)
-        logging.info(f"✓ YOLO Model geladen: {model_path}")
+        model.to(device)
+        logging.info(f"✓ YOLO Model geladen: {model_path} auf {device.upper()}")
         return True
     except Exception as e:
         logging.error(f"✗ Fehler beim Laden des Models: {e}")
